@@ -2,15 +2,21 @@ import express from 'express';
 import cors from 'cors';
 import crypto from 'crypto';
 import https from 'https';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
 
-const SKILLPAY_AUTH_ID = 'M00006572'; // Replace with your actual AuthID
-const SKILLPAY_AUTH_KEY = 'Qv0rg4oN8cS9sm6PS3rr6fu7MN2FB0Oo'; // Replace with your actual AuthKey
+const SKILLPAY_AUTH_ID = process.env.SKILLPAY_AUTH_ID;
+const SKILLPAY_AUTH_KEY = process.env.SKILLPAY_AUTH_KEY;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3001';
 
 // Function to encrypt data using AES-256-CBC
 const encrypt = (data, key) => {
@@ -43,7 +49,7 @@ app.post('/api/paymentinit', (req, res) => {
     ContactNo: paymentData.contact,
     EmailId: paymentData.email,
     IntegrationType: 'seamless',
-    CallbackURL: 'http://localhost:3000/callback', // Your frontend callback URL
+    CallbackURL: `${FRONTEND_URL}/callback`, // Your frontend callback URL
     adf1: 'NA',
     adf2: 'NA',
     adf3: 'NA',
