@@ -71,12 +71,17 @@ app.post('/api/paymentinit', (req, res) => {
     skillPayRes.on('end', () => {
       console.log('SkillPay Response:', data);
       try {
-        const response = JSON.parse(data);
-        if (response.respData) {
-          const decryptedData = decrypt(response.respData, SKILLPAY_AUTH_KEY);
-          res.json(decryptedData);
+        // Check if the response is JSON
+        if (data.trim().startsWith('{')) {
+          const response = JSON.parse(data);
+          if (response.respData) {
+            const decryptedData = decrypt(response.respData, SKILLPAY_AUTH_KEY);
+            res.json(decryptedData);
+          } else {
+            res.status(500).json({ error: 'Invalid response from SkillPay', details: JSON.stringify(response) });
+          }
         } else {
-          res.status(500).json({ error: 'Invalid response from SkillPay' });
+            res.status(500).json({ error: 'Received non-JSON response from SkillPay', details: data });
         }
       } catch (error) {
         res.status(500).json({ error: 'Failed to process SkillPay response', details: error.message });
