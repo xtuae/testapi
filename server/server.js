@@ -136,6 +136,28 @@ app.post('/api/statusenquiry', (req, res) => {
     skillPayReq.end();
 });
 
+// Handle callback from SkillPay with encrypted data
+app.post('/api/callback', (req, res) => {
+    console.log('Callback received:', req.body);
+    
+    try {
+        // Check if we have encrypted response data
+        if (req.body.respData) {
+            const decryptedData = decrypt(req.body.respData, SKILLPAY_AUTH_KEY);
+            console.log('Decrypted callback data:', decryptedData);
+            res.json({ success: true, data: decryptedData });
+        } else if (req.body.txnErrorMsg) {
+            // Handle error response
+            res.json({ success: false, error: req.body.txnErrorMsg });
+        } else {
+            res.json({ success: false, error: 'No data received' });
+        }
+    } catch (error) {
+        console.error('Error processing callback:', error);
+        res.status(500).json({ success: false, error: 'Failed to process callback', details: error.message });
+    }
+});
+
 
 try {
     app.listen(port, () => {
